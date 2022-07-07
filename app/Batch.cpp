@@ -1,6 +1,6 @@
 // Copyright 2009 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
-
+//{{{
 #include "Batch.h"
 // ospray_sg
 #include "sg/Frame.h"
@@ -20,10 +20,12 @@
 
 // CLI
 #include <CLI11.hpp>
+//}}}
 
 static bool resetFileId = false;
 
-BatchContext::BatchContext(StudioCommon &_common)
+//{{{
+BatchContext::BatchContext (StudioCommon& _common)
     : StudioContext(_common, StudioMode::BATCH)
 {
   frame->child("scaleNav").setValue(1.f);
@@ -32,7 +34,9 @@ BatchContext::BatchContext(StudioCommon &_common)
   // Default saved image baseName (cmdline --image to override)
   optImageName = "ospBatch";
 }
+//}}}
 
+//{{{
 void BatchContext::start()
 {
   std::cerr << "Batch mode\n";
@@ -102,8 +106,10 @@ void BatchContext::start()
     sg::clearAssets();
   }
 }
+//}}}
 
-void BatchContext::addToCommandLine(std::shared_ptr<CLI::App> app) {
+//{{{
+void BatchContext::addToCommandLine (std::shared_ptr<CLI::App> app) {
   app->add_option(
     "--cameraType",
     optCameraTypeStr,
@@ -209,7 +215,8 @@ void BatchContext::addToCommandLine(std::shared_ptr<CLI::App> app) {
     "Saves the SceneGraph representing the frame"
   );
 }
-
+//}}}
+//{{{
 bool BatchContext::parseCommandLine()
 {
   int ac = studioCommon.argc;
@@ -250,6 +257,9 @@ bool BatchContext::parseCommandLine()
     return 1;
 }
 
+//}}}
+
+//{{{
 void BatchContext::refreshRenderer()
 {
   frame->createChild("renderer", "renderer_" + optRendererTypeStr);
@@ -262,7 +272,8 @@ void BatchContext::refreshRenderer()
   if (r.hasChild("maxContribution") && maxContribution < (float)math::inf)
     r["maxContribution"].setValue(maxContribution);
 }
-
+//}}}
+//{{{
 void BatchContext::reshape()
 {
   auto fSize = frame->child("windowSize").valueAs<vec2i>();
@@ -285,8 +296,9 @@ void BatchContext::reshape()
   frame->child("windowSize") = fSize;
   frame->currentAccum = 0;
 }
-
-void BatchContext::refreshCamera(int cameraIdx)
+//}}}
+//{{{
+void BatchContext::refreshCamera (int cameraIdx)
 {
   if (cameraIdx <= cameras->size() && cameraIdx > 0) {
     std::cout << "Loading camera from index: " << std::to_string(cameraIdx)
@@ -331,7 +343,9 @@ void BatchContext::refreshCamera(int cameraIdx)
 
   reshape(); // resets aspect
 }
+//}}}
 
+//{{{
 void BatchContext::render()
 {
   auto &frameBuffer = frame->childAs<sg::FrameBuffer>("framebuffer");
@@ -363,7 +377,8 @@ void BatchContext::render()
 
   frame->child("navMode") = false;
 }
-
+//}}}
+//{{{
 void BatchContext::renderFrame()
 {
   if (studioCommon.denoiserAvailable && optDenoiser) {
@@ -442,10 +457,11 @@ void BatchContext::renderFrame()
       dump << j.dump();
     }
   }
-  
+
   pluginManager->main(shared_from_this());
 }
-
+//}}}
+//{{{
 void BatchContext::renderAnimation()
 {
   float endTime = animationManager->getTimeRange().upper;
@@ -472,8 +488,10 @@ void BatchContext::renderAnimation()
     time += step;
   }
 }
+//}}}
 
-void BatchContext::refreshScene(bool resetCam)
+//{{{
+void BatchContext::refreshScene (bool resetCam)
 {
   if (frameAccumLimit)
     frame->accumLimit = frameAccumLimit;
@@ -511,7 +529,8 @@ void BatchContext::refreshScene(bool resetCam)
 
   frame->child("windowSize") = optResolution;
 }
-
+//}}}
+//{{{
 void BatchContext::updateCamera()
 {
   frame->currentAccum = 0;
@@ -525,7 +544,7 @@ void BatchContext::updateCamera()
     cameraIdx = 0; // reset global-context cameraIndex
     cameraView = nullptr; // only used for arcball/default
   } else if (cameraView && *cameraView != affine3f{one}) {
-    // use camera settings from scene camera if specified by global context specific 
+    // use camera settings from scene camera if specified by global context specific
     if (cameraSettingsIdx) {
       auto settingsCamera = cameras->at_index(cameraSettingsIdx).second;
       for (auto &c : settingsCamera->children()) {
@@ -578,8 +597,10 @@ void BatchContext::updateCamera()
   if (camera->hasChild("interpupillaryDistance"))
     camera->child("interpupillaryDistance").setValue(optInterpupillaryDistance);
 }
+//}}}
 
-void BatchContext::importFiles(sg::NodePtr world)
+//{{{
+void BatchContext::importFiles (sg::NodePtr world)
 {
   importedModels = createNode("importXfm", "transform");
   frame->child("world").add(importedModels);
@@ -685,3 +706,4 @@ void BatchContext::importFiles(sg::NodePtr world)
   // Initializes time range for newly imported models
   animationManager->init();
 }
+//}}}

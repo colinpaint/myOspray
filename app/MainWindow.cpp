@@ -1,6 +1,6 @@
 // Copyright 2018 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
-
+//{{{
 #include "MainWindow.h"
 // imgui
 #include "imgui.h"
@@ -52,6 +52,7 @@
 
 using namespace ospray_studio;
 using namespace ospray;
+//}}}
 
 static ImGuiWindowFlags g_imguiWindowFlags = ImGuiWindowFlags_AlwaysAutoResize;
 
@@ -60,6 +61,7 @@ static bool g_saveNextFrame = false;
 static bool g_animatingPath = false;
 static bool g_clearSceneConfirm = false;
 
+//{{{
 static const std::vector<std::string> g_scenes = {"tutorial_scene",
     "sphere",
     "particle_volume",
@@ -69,18 +71,17 @@ static const std::vector<std::string> g_scenes = {"tutorial_scene",
     "torus_volume",
     "unstructured_volume",
     "multilevel_hierarchy"};
+//}}}
 
 #ifdef USE_MPI
-static const std::vector<std::string> g_renderers = {
-    "scivis", "pathtracer", "ao", "debug", "mpiRaycast"};
+  static const std::vector<std::string> g_renderers = { "scivis", "pathtracer", "ao", "debug", "mpiRaycast"};
 #else
-static const std::vector<std::string> g_renderers = {
-    "scivis", "pathtracer", "ao", "debug"};
+  static const std::vector<std::string> g_renderers = { "scivis", "pathtracer", "ao", "debug"};
 #endif
 
 // list of cameras imported with the scene definition
 static CameraMap g_sceneCameras;
-
+//{{{
 static const std::vector<std::string> g_debugRendererTypes = {"eyeLight",
     "primID",
     "geomID",
@@ -92,7 +93,8 @@ static const std::vector<std::string> g_debugRendererTypes = {"eyeLight",
     "dPds",
     "dPdt",
     "volume"};
-
+//}}}
+//{{{
 static const std::vector<std::string> g_lightTypes = {"ambient",
     "cylinder",
     "distant",
@@ -101,6 +103,7 @@ static const std::vector<std::string> g_lightTypes = {"ambient",
     "spot",
     "sunSky",
     "quad"};
+//}}}
 
 std::vector<CameraState> g_camPath; // interpolated path through cameraStack
 int g_camSelectedStackIndex = 0;
@@ -109,8 +112,7 @@ float g_camPathSpeed = 5; // defined in hundredths (e.g. 10 = 10 * 0.01 = 0.1)
 const int g_camPathPause = 2; // _seconds_ to pause for at end of path
 int g_rotationConstraint = -1;
 
-const double CAM_MOVERATE =
-    10.0; // TODO: the constant should be scene dependent or user changeable
+const double CAM_MOVERATE = 10.0; // TODO: the constant should be scene dependent or user changeable
 double g_camMoveX = 0.0;
 double g_camMoveY = 0.0;
 double g_camMoveZ = 0.0;
@@ -122,31 +124,37 @@ float lockAspectRatio = 0.0;
 
 sg::NodePtr g_copiedMat = nullptr;
 
+//{{{
 std::string quatToString(quaternionf &q)
 {
   std::stringstream ss;
   ss << q;
   return ss.str();
 }
-
+//}}}
+//{{{
 bool rendererUI_callback(void *, int index, const char **out_text)
 {
   *out_text = g_renderers[index].c_str();
   return true;
 }
+//}}}
+//{{{
 
 bool debugTypeUI_callback(void *, int index, const char **out_text)
 {
   *out_text = g_debugRendererTypes[index].c_str();
   return true;
 }
-
+//}}}
+//{{{
 bool lightTypeUI_callback(void *, int index, const char **out_text)
 {
   *out_text = g_lightTypes[index].c_str();
   return true;
 }
-
+//}}}
+//{{{
 bool cameraUI_callback(void *, int index, const char **out_text)
 {
   static std::string outText;
@@ -154,29 +162,32 @@ bool cameraUI_callback(void *, int index, const char **out_text)
   *out_text = outText.c_str();
   return true;
 }
-
+//}}}
+//{{{
 bool stringVec_callback(void *data, int index, const char **out_text)
 {
   *out_text = ((std::string *)data)[index].c_str();
   return true;
 }
-
+//}}}
+//{{{
 std::string vec3fToString(const vec3f &v)
 {
   std::stringstream ss;
   ss << v;
   return ss.str();
 }
+//}}}
 
-// MainWindow definitions ///////////////////////////////////////////////
-
+//{{{
 void error_callback(int error, const char *desc)
 {
   std::cerr << "error " << error << ": " << desc << std::endl;
 }
+//}}}
 
 MainWindow *MainWindow::activeWindow = nullptr;
-
+//{{{
 MainWindow::MainWindow(StudioCommon &_common)
     : StudioContext(_common, StudioMode::GUI), windowSize(_common.defaultSize), scene("")
 {
@@ -446,7 +457,8 @@ MainWindow::MainWindow(StudioCommon &_common)
   glfwGetFramebufferSize(glfwWindow, &windowSize.x, &windowSize.y);
   reshape(windowSize);
 }
-
+//}}}
+//{{{
 MainWindow::~MainWindow()
 {
   ImGui_ImplOpenGL2_Shutdown();
@@ -489,34 +501,40 @@ void MainWindow::start()
     mainLoop();
   }
 }
-
+//}}}
+//{{{
 MainWindow *MainWindow::getActiveWindow()
 {
   return activeWindow;
 }
-
+//}}}
+//{{{
 std::shared_ptr<sg::Frame> MainWindow::getFrame()
 {
   return frame;
 }
-
+//}}}
+//{{{
 void MainWindow::registerDisplayCallback(
     std::function<void(MainWindow *)> callback)
 {
   displayCallback = callback;
 }
-
+//}}}
+//{{{
 void MainWindow::registerKeyCallback(std::function<void(
         MainWindow *, int key, int scancode, int action, int mods)> callback)
 {
   keyCallback = callback;
 }
-
+//}}}
+//{{{
 void MainWindow::registerImGuiCallback(std::function<void()> callback)
 {
   uiCallback = callback;
 }
-
+//}}}
+//{{{
 void MainWindow::mainLoop()
 {
   // continue until the user closes the window
@@ -573,7 +591,8 @@ void MainWindow::mainLoop()
 
   waitOnOSPRayFrame();
 }
-
+//}}}
+//{{{
 void MainWindow::reshape(const vec2i &newWindowSize)
 {
   windowSize = newWindowSize;
@@ -606,7 +625,8 @@ void MainWindow::reshape(const vec2i &newWindowSize)
   // update camera
   arcballCamera->updateWindowSize(windowSize);
 }
-
+//}}}
+//{{{
 void MainWindow::updateCamera()
 {
   frame->currentAccum = 0;
@@ -680,12 +700,14 @@ void MainWindow::updateCamera()
     camera->child("focusDistance").setValue(focusDistance);
   }
 }
-
+//}}}
+//{{{
 void MainWindow::setCameraState(CameraState &cs)
 {
   arcballCamera->setState(cs);
 }
-
+//}}}
+//{{{
 void MainWindow::centerOnEyePos()
 {
   // Recenters camera at the eye position and zooms all the way in, like FPV
@@ -694,7 +716,8 @@ void MainWindow::centerOnEyePos()
   arcballCamera->setCenter(arcballCamera->eyePos());
   arcballCamera->setZoomLevel(0.f);
 }
-
+//}}}
+//{{{
 void MainWindow::pickCenterOfRotation(float x, float y)
 {
   ospray::cpp::PickResult res;
@@ -719,7 +742,8 @@ void MainWindow::pickCenterOfRotation(float x, float y)
     updateCamera();
   }
 }
-
+//}}}
+//{{{
 void MainWindow::keyboardMotion()
 {
   if (!(g_camMoveX || g_camMoveY || g_camMoveZ || g_camMoveE || g_camMoveA
@@ -761,7 +785,8 @@ void MainWindow::keyboardMotion()
   }
   updateCamera();
 }
-
+//}}}
+//{{{
 void MainWindow::changeToDefaultCamera()
 {
   auto defaultCamera = g_sceneCameras["default"];
@@ -797,7 +822,8 @@ void MainWindow::changeToDefaultCamera()
   activeWindow->centerOnEyePos();
   updateCamera(); // to reflect new default camera properties in GUI
 }
-
+//}}}
+//{{{
 void MainWindow::motion(const vec2f &position)
 {
   if (frame->pauseRendering)
@@ -851,12 +877,13 @@ void MainWindow::motion(const vec2f &position)
 
   previousMouse = mouse;
 }
-
+//}}}
+//{{{
 void MainWindow::mouseButton(const vec2f &position)
 {
   if (frame->pauseRendering)
     return;
-    
+
   if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS
       && glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
     // when picking new center of rotation change to default camera first
@@ -868,7 +895,8 @@ void MainWindow::mouseButton(const vec2f &position)
     pickCenterOfRotation(scaledPosition.x, scaledPosition.y);
   }
 }
-
+//}}}
+//{{{
 void MainWindow::mouseWheel(const vec2f &scroll)
 {
   if (!scroll || frame->pauseRendering)
@@ -893,7 +921,8 @@ void MainWindow::mouseWheel(const vec2f &scroll)
   // XXX anything interesting to do with horizontal scroll wheel?
   // Perhaps cycle through renderer types?  Or toggle denoiser or navigation?
 }
-
+//}}}
+//{{{
 void MainWindow::display()
 {
   static auto displayStart = std::chrono::high_resolution_clock::now();
@@ -1100,17 +1129,20 @@ void MainWindow::display()
   // swap buffers
   glfwSwapBuffers(glfwWindow);
 }
-
+//}}}
+//{{{
 void MainWindow::startNewOSPRayFrame()
 {
   frame->startNewFrame();
 }
-
+//}}}
+//{{{
 void MainWindow::waitOnOSPRayFrame()
 {
   frame->waitOnFrame();
 }
-
+//}}}
+//{{{
 void MainWindow::updateTitleBar()
 {
   std::stringstream windowTitle;
@@ -1150,12 +1182,15 @@ void MainWindow::updateTitleBar()
 
   glfwSetWindowTitle(glfwWindow, windowTitle.str().c_str());
 }
+//}}}
 
+//{{{
 GLFWwindow *MainWindow::getGLFWWindow()
 {
   return glfwWindow;
 }
-
+//}}}
+//{{{
 void MainWindow::buildUI()
 {
   // build main menu and options
@@ -1172,7 +1207,8 @@ void MainWindow::buildUI()
     if (p->isShown())
       p->buildUI(ImGui::GetCurrentContext());
 }
-
+//}}}
+//{{{
 void MainWindow::refreshRenderer()
 {
   // Change renderer if current type doesn't match requested
@@ -1207,7 +1243,8 @@ void MainWindow::refreshRenderer()
     r.handle().removeParam("map_backplate");
   }
 }
-
+//}}}
+//{{{
 void MainWindow::saveRendererParams()
 {
   auto &r = frame->childAs<sg::Renderer>("renderer");
@@ -1220,7 +1257,8 @@ void MainWindow::saveRendererParams()
   if (r.hasChild("maxContribution"))
     maxContribution = r["maxContribution"].valueAs<float>();
 }
-
+//}}}
+//{{{
 void MainWindow::refreshScene(bool resetCam)
 {
   if (frameAccumLimit)
@@ -1267,10 +1305,12 @@ void MainWindow::refreshScene(bool resetCam)
   auto &fb = frame->childAs<sg::FrameBuffer>("framebuffer");
   fb.resetAccumulation();
 }
-
+//}}}
+//{{{
 void MainWindow::addToCommandLine(std::shared_ptr<CLI::App> app) {
 }
-
+//}}}
+//{{{
 bool MainWindow::parseCommandLine()
 {
   int ac = studioCommon.argc;
@@ -1296,10 +1336,11 @@ bool MainWindow::parseCommandLine()
 
   return true;
 }
-
+//}}}
+//{{{
 // Importer for all known file types (geometry and models)
 void MainWindow::importFiles(sg::NodePtr world)
-{ 
+{
   std::shared_ptr<CameraMap> cameras{nullptr};
   if (!sgFileCameras) {
     cameras = std::make_shared<CameraMap>();
@@ -1387,7 +1428,8 @@ void MainWindow::importFiles(sg::NodePtr world)
   else if (cameras)
     g_sceneCameras = *cameras;
 }
-
+//}}}
+//{{{
 void MainWindow::saveCurrentFrame()
 {
   int filenum = 0;
@@ -1411,7 +1453,8 @@ void MainWindow::saveCurrentFrame()
         << std::endl;
   frame->saveFrame(std::string(filename), screenshotFlags);
 }
-
+//}}}
+//{{{
 void MainWindow::pushLookMark()
 {
   cameraStack.push_back(arcballCamera->getState());
@@ -1430,7 +1473,8 @@ void MainWindow::pushLookMark()
       at.y,
       at.z);
 }
-
+//}}}
+//{{{
 void MainWindow::popLookMark()
 {
   if (cameraStack.empty())
@@ -1441,9 +1485,9 @@ void MainWindow::popLookMark()
   arcballCamera->setState(cs);
   updateCamera();
 }
+//}}}
 
-// Main menu //////////////////////////////////////////////////////////////////
-
+//{{{
 void MainWindow::buildMainMenu()
 {
   // build main menu bar and options
@@ -1454,7 +1498,8 @@ void MainWindow::buildMainMenu()
   buildMainMenuPlugins();
   ImGui::EndMainMenuBar();
 }
-
+//}}}
+//{{{
 void MainWindow::buildMainMenuFile()
 {
   static bool showImportFileBrowser = false;
@@ -1583,7 +1628,8 @@ void MainWindow::buildMainMenuFile()
     }
   }
 }
-
+//}}}
+//{{{
 void MainWindow::buildMainMenuEdit()
 {
   if (ImGui::BeginMenu("Edit")) {
@@ -1647,7 +1693,8 @@ void MainWindow::buildMainMenuEdit()
     ImGui::EndPopup();
   }
 }
-
+//}}}
+//{{{
 void MainWindow::buildMainMenuView()
 {
   static bool showFileBrowser = false;
@@ -1840,7 +1887,8 @@ void MainWindow::buildMainMenuView()
     }
   }
 }
-
+//}}}
+//{{{
 void MainWindow::buildMainMenuPlugins()
 {
   if (!pluginPanels.empty() && ImGui::BeginMenu("Plugins")) {
@@ -1851,9 +1899,8 @@ void MainWindow::buildMainMenuPlugins()
     ImGui::EndMenu();
   }
 }
-
-// Option windows /////////////////////////////////////////////////////////////
-
+//}}}
+//{{{
 void MainWindow::buildWindows()
 {
   if (showRendererEditor)
@@ -1882,7 +1929,8 @@ void MainWindow::buildWindows()
   // Add the animation widget's UI
   animationWidget->addUI();
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowRendererEditor()
 {
   if (!ImGui::Begin(
@@ -1952,7 +2000,8 @@ void MainWindow::buildWindowRendererEditor()
 
   ImGui::End();
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowFrameBufferEditor()
 {
   if (!ImGui::Begin(
@@ -2122,7 +2171,8 @@ void MainWindow::buildWindowFrameBufferEditor()
 
   ImGui::End();
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowKeyframes()
 {
   if (!ImGui::Begin("Keyframe editor", &showKeyframes, g_imguiWindowFlags)) {
@@ -2246,7 +2296,8 @@ void MainWindow::buildWindowKeyframes()
 
   ImGui::End();
 }
-
+//}}}
+//{{{
 void MainWindow::setCameraSnapshot(size_t snapshot)
 {
   if (snapshot < cameraStack.size()) {
@@ -2255,7 +2306,8 @@ void MainWindow::setCameraSnapshot(size_t snapshot)
     updateCamera();
   }
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowSnapshots()
 {
   if (!ImGui::Begin("Camera snap shots", &showSnapshots, g_imguiWindowFlags)) {
@@ -2279,7 +2331,8 @@ void MainWindow::buildWindowSnapshots()
   }
   ImGui::End();
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowLightEditor()
 {
   if (!ImGui::Begin("Light editor", &showLightEditor, g_imguiWindowFlags)) {
@@ -2398,7 +2451,8 @@ void MainWindow::buildWindowLightEditor()
 
   ImGui::End();
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowCameraEditor()
 {
   if (!ImGui::Begin("Camera editor", &showCameraEditor)) {
@@ -2453,7 +2507,8 @@ void MainWindow::buildWindowCameraEditor()
 
   ImGui::End();
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowMaterialEditor()
 {
   if (!ImGui::Begin("Material editor", &showMaterialEditor)) {
@@ -2488,7 +2543,8 @@ void MainWindow::buildWindowMaterialEditor()
 
   ImGui::End();
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowTransferFunctionEditor()
 {
   if (!ImGui::Begin("Transfer Function editor", &showTransferFunctionEditor)) {
@@ -2585,7 +2641,8 @@ void MainWindow::buildWindowTransferFunctionEditor()
 
   ImGui::End();
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowIsosurfaceEditor()
 {
   if (!ImGui::Begin("Isosurface editor", &showIsosurfaceEditor)) {
@@ -2706,7 +2763,8 @@ void MainWindow::buildWindowIsosurfaceEditor()
 
   ImGui::End();
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowTransformEditor()
 {
   if (!ImGui::Begin("Transform Editor", &showTransformEditor)) {
@@ -2765,7 +2823,8 @@ void MainWindow::buildWindowTransformEditor()
 
   ImGui::End();
 }
-
+//}}}
+//{{{
 void MainWindow::buildWindowRenderingStats()
 {
   ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration
@@ -2838,3 +2897,4 @@ void MainWindow::buildWindowRenderingStats()
 
   ImGui::End();
 }
+//}}}

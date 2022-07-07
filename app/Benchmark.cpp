@@ -3,11 +3,13 @@
 
 #include "Benchmark.h"
 
+//{{{
 void BenchmarkContext::start() {
   ::benchmark::Initialize(&studioCommon.argc, (char **)(studioCommon.argv));
   BatchContext::start();
 }
-
+//}}}
+//{{{
 void BenchmarkContext::renderFrame() {
   ::benchmark::ClearRegisteredBenchmarks();
   ::benchmark::RegisterBenchmark("OSPRay Studio Benchmark", [&](::benchmark::State &state) {
@@ -21,3 +23,4 @@ void BenchmarkContext::renderFrame() {
   })->Unit(::benchmark::kMillisecond);
   ::benchmark::RunSpecifiedBenchmarks();
 }
+//}}}

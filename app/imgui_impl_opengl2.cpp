@@ -1,3 +1,4 @@
+//{{{
 // dear imgui: Renderer Backend for OpenGL2 (legacy OpenGL, fixed pipeline)
 // This needs to be used along with a Platform Backend (e.g. GLFW, SDL, Win32, custom..)
 
@@ -35,7 +36,8 @@
 //  2017-09-01: OpenGL: Save and restore current polygon mode.
 //  2016-09-10: OpenGL: Uploading font texture as RGBA32 to increase compatibility with users shaders (not ideal).
 //  2016-09-05: OpenGL: Fixed save and restore of current scissor rectangle.
-
+//}}}
+//{{{
 #include "imgui.h"
 #include "imgui_impl_opengl2.h"
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
@@ -57,25 +59,31 @@
 #else
 #include <GL/gl.h>
 #endif
+//}}}
 
+//{{{
 struct ImGui_ImplOpenGL2_Data
 {
     GLuint       FontTexture;
 
     ImGui_ImplOpenGL2_Data() { memset(this, 0, sizeof(*this)); }
 };
+//}}}
 
+//{{{
 // Backend data stored in io.BackendRendererUserData to allow support for multiple Dear ImGui contexts
 // It is STRONGLY preferred that you use docking branch with multi-viewports (== single Dear ImGui context + multiple windows) instead of multiple Dear ImGui contexts.
 static ImGui_ImplOpenGL2_Data* ImGui_ImplOpenGL2_GetBackendData()
 {
     return ImGui::GetCurrentContext() ? (ImGui_ImplOpenGL2_Data*)ImGui::GetIO().BackendRendererUserData : NULL;
 }
+//}}}
 
 // Forward Declarations
 static void ImGui_ImplOpenGL2_InitPlatformInterface();
 static void ImGui_ImplOpenGL2_ShutdownPlatformInterface();
 
+//{{{
 // Functions
 bool    ImGui_ImplOpenGL2_Init()
 {
@@ -93,7 +101,8 @@ bool    ImGui_ImplOpenGL2_Init()
 
     return true;
 }
-
+//}}}
+//{{{
 void    ImGui_ImplOpenGL2_Shutdown()
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -105,7 +114,9 @@ void    ImGui_ImplOpenGL2_Shutdown()
     io.BackendRendererUserData = NULL;
     IM_DELETE(bd);
 }
+//}}}
 
+//{{{
 void    ImGui_ImplOpenGL2_NewFrame()
 {
     ImGui_ImplOpenGL2_Data* bd = ImGui_ImplOpenGL2_GetBackendData();
@@ -114,7 +125,9 @@ void    ImGui_ImplOpenGL2_NewFrame()
     if (!bd->FontTexture)
         ImGui_ImplOpenGL2_CreateDeviceObjects();
 }
+//}}}
 
+//{{{
 static void ImGui_ImplOpenGL2_SetupRenderState(ImDrawData* draw_data, int fb_width, int fb_height)
 {
     // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, vertex/texcoord/color pointers, polygon fill.
@@ -158,7 +171,8 @@ static void ImGui_ImplOpenGL2_SetupRenderState(ImDrawData* draw_data, int fb_wid
     glPushMatrix();
     glLoadIdentity();
 }
-
+//}}}
+//{{{
 // OpenGL2 Render function.
 // Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly.
 // This is in order to be able to run within an OpenGL engine that doesn't do so.
@@ -247,7 +261,9 @@ void ImGui_ImplOpenGL2_RenderDrawData(ImDrawData* draw_data)
     glShadeModel(last_shade_model);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, last_tex_env_mode);
 }
+//}}}
 
+//{{{
 bool ImGui_ImplOpenGL2_CreateFontsTexture()
 {
     // Build texture atlas
@@ -275,7 +291,8 @@ bool ImGui_ImplOpenGL2_CreateFontsTexture()
 
     return true;
 }
-
+//}}}
+//{{{
 void ImGui_ImplOpenGL2_DestroyFontsTexture()
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -287,17 +304,21 @@ void ImGui_ImplOpenGL2_DestroyFontsTexture()
         bd->FontTexture = 0;
     }
 }
-
+//}}}
+//{{{
 bool    ImGui_ImplOpenGL2_CreateDeviceObjects()
 {
     return ImGui_ImplOpenGL2_CreateFontsTexture();
 }
-
+//}}}
+//{{{
 void    ImGui_ImplOpenGL2_DestroyDeviceObjects()
 {
     ImGui_ImplOpenGL2_DestroyFontsTexture();
 }
+//}}}
 
+//{{{
 //--------------------------------------------------------------------------------------------------------
 // MULTI-VIEWPORT / PLATFORM INTERFACE SUPPORT
 // This is an _advanced_ and _optional_ feature, allowing the backend to create and handle multiple viewports simultaneously.
@@ -314,14 +335,18 @@ static void ImGui_ImplOpenGL2_RenderWindow(ImGuiViewport* viewport, void*)
     }
     ImGui_ImplOpenGL2_RenderDrawData(viewport->DrawData);
 }
+//}}}
 
+//{{{
 static void ImGui_ImplOpenGL2_InitPlatformInterface()
 {
     ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
     platform_io.Renderer_RenderWindow = ImGui_ImplOpenGL2_RenderWindow;
 }
-
+//}}}
+//{{{
 static void ImGui_ImplOpenGL2_ShutdownPlatformInterface()
 {
     ImGui::DestroyPlatformWindows();
 }
+//}}}

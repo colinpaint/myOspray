@@ -1,16 +1,14 @@
 // Copyright 2017 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
-
 #pragma once
 
 #include <vector>
-
 #include "rkcommon/math/AffineSpace.h"
-
 using namespace rkcommon::math;
 
 class ArcballCamera;
 
+//{{{
 class CameraState
 {
  public:
@@ -98,7 +96,8 @@ class CameraState
     return s0 * qt0 + s1 * qt1;
   }
 };
-
+//}}}
+//{{{
 class ArcballCamera
 {
  public:
@@ -176,3 +175,4 @@ inline std::ostream &operator<<(std::ostream &os, const CameraState &cs)
   std::cout << "rotation = " << cs.rotation << std::endl;
   return os;
 }
+//}}}

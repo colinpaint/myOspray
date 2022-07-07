@@ -1,6 +1,6 @@
 // Copyright 2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
-
+//{{{
 #include "TimeSeriesWindow.h"
 #include "sg/scene/transfer_function/TransferFunction.h"
 #include "sg/scene/lights/LightsManager.h"
@@ -21,17 +21,20 @@
 #include <CLI11.hpp>
 
 using namespace ospray::sg;
+//}}}
 
 std::vector<std::string> variablesLoaded;
 
-TimeSeriesWindow::TimeSeriesWindow(StudioCommon &_common) 
+//{{{
+TimeSeriesWindow::TimeSeriesWindow(StudioCommon &_common)
   : MainWindow(_common)
 {
   pluginManager = std::make_shared<PluginManager>();
 }
-
+//}}}
 TimeSeriesWindow::~TimeSeriesWindow() {}
 
+//{{{
 void TimeSeriesWindow::start()
 {
   std::cout << "Time Series mode" << std::endl;
@@ -60,8 +63,10 @@ void TimeSeriesWindow::start()
 
   mainLoop();
 }
+//}}}
 
-bool TimeSeriesWindow::isTimestepVolumeLoaded(int variableNum, size_t timestep)
+//{{{
+bool TimeSeriesWindow::isTimestepVolumeLoaded (int variableNum, size_t timestep)
 {
   bool loaded = true;
 
@@ -82,13 +87,17 @@ bool TimeSeriesWindow::isTimestepVolumeLoaded(int variableNum, size_t timestep)
 
   return loaded;
 }
+//}}}
 
-bool variableUI_callback(void *, int index, const char **out_text)
+//{{{
+bool variableUI_callback (void *, int index, const char **out_text)
 {
   *out_text = variablesLoaded[index].c_str();
   return true;
 }
+//}}}
 
+//{{{
 void TimeSeriesWindow::mainLoop()
 {
   // generate timeseries data  and create necessary SG objects here.
@@ -295,8 +304,10 @@ void TimeSeriesWindow::mainLoop()
 
   activeWindow->mainLoop();
 }
+//}}}
 
-void TimeSeriesWindow::updateWindowTitle(std::string &updatedTitle)
+//{{{
+void TimeSeriesWindow::updateWindowTitle (std::string &updatedTitle)
 {
   int numTimesteps = g_allWorlds.size();
   std::stringstream windowTitle;
@@ -309,8 +320,10 @@ void TimeSeriesWindow::updateWindowTitle(std::string &updatedTitle)
   }
   updatedTitle = windowTitle.str();
 }
+//}}}
 
-void TimeSeriesWindow::addToCommandLine(std::shared_ptr<CLI::App> app) {
+//{{{
+void TimeSeriesWindow::addToCommandLine (std::shared_ptr<CLI::App> app) {
   app->add_option(
     "--lightType",
     lightTypeStr,
@@ -356,7 +369,8 @@ void TimeSeriesWindow::addToCommandLine(std::shared_ptr<CLI::App> app) {
     "Load these volume files"
   );
 }
-
+//}}}
+//{{{
 bool TimeSeriesWindow::parseCommandLine()
 {
   int ac = studioCommon.argc;
@@ -377,7 +391,9 @@ bool TimeSeriesWindow::parseCommandLine()
 
   return 1;
 }
+//}}}
 
+//{{{
 void TimeSeriesWindow::addTimeseriesUI()
 {
   auto frame = activeWindow->getFrame();
@@ -400,8 +416,9 @@ void TimeSeriesWindow::addTimeseriesUI()
   }
   setTimestepsUI(numTimesteps);
 }
-
-void TimeSeriesWindow::setTimestepsUI(int numTimesteps){
+//}}}
+//{{{
+void TimeSeriesWindow::setTimestepsUI (int numTimesteps){
 
   if (g_timeseriesParameters.playTimesteps) {
     if (ImGui::Button("Pause")) {
@@ -485,14 +502,16 @@ void TimeSeriesWindow::setTimestepsUI(int numTimesteps){
   if (ImGui::Checkbox("pause rendering",
                       &g_timeseriesParameters.pauseRendering)) {
     if (activeWindow) {
-      frame->pauseRendering = 
+      frame->pauseRendering =
           g_timeseriesParameters.pauseRendering;
     }
   }
 
   ImGui::End();
 }
+//}}}
 
+//{{{
 void TimeSeriesWindow::animateTimesteps()
 {
   int numTimesteps = importAsSeparateTimeseries ? g_allSeparateWorlds[whichVariable].size() : g_allWorlds.size();
@@ -530,8 +549,10 @@ void TimeSeriesWindow::animateTimesteps()
     }
   }
 }
+//}}}
 
-void TimeSeriesWindow::setTimestepFb(int timestep)
+//{{{
+void TimeSeriesWindow::setTimestepFb (int timestep)
 {
   auto frame = activeWindow->getFrame();
   if (currentTimestep == timestep) {
@@ -558,7 +579,9 @@ void TimeSeriesWindow::setTimestepFb(int timestep)
     framebufferLastReset[currentTimestep] = rkcommon::utility::TimeStamp();
   }
 }
+//}}}
 
+//{{{
 void TimeSeriesWindow::resetAccumulation()
 {
   auto frame               = activeWindow->getFrame();
@@ -572,8 +595,10 @@ void TimeSeriesWindow::resetAccumulation()
     framebufferLastReset[currentTimestep] = framebufferResetRequired;
   }
 }
+//}}}
 
-void TimeSeriesWindow::setVariableTimeseries(int whichVariable, int timestep)
+//{{{
+void TimeSeriesWindow::setVariableTimeseries (int whichVariable, int timestep)
 {
   auto frame = activeWindow->getFrame();
   auto world = g_allSeparateWorlds[whichVariable][timestep];
@@ -587,8 +612,9 @@ void TimeSeriesWindow::setVariableTimeseries(int whichVariable, int timestep)
   if (setSeparateFramebuffers)
     setTimestepFb(timestep);
 }
-
-void TimeSeriesWindow::setTimestep(int timestep)
+//}}}
+//{{{
+void TimeSeriesWindow::setTimestep (int timestep)
 {
   auto frame = activeWindow->getFrame();
   auto world = g_allWorlds[timestep];
@@ -596,9 +622,10 @@ void TimeSeriesWindow::setTimestep(int timestep)
   // Simply changing the world doesn't mark lights or world as modified.  Make
   // sure the current lights list is set on the new world.
   lightsManager->updateWorld(*world);
-  frame->add(world); 
+  frame->add(world);
 
   //set up separate framebuffers
   if (setSeparateFramebuffers)
     setTimestepFb(timestep);
 }
+//}}}

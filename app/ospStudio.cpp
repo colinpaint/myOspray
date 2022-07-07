@@ -57,7 +57,7 @@ void StudioCommon::splitPluginArguments() {
 }
 //}}}
 //{{{
-void StudioContext::addToCommandLine(std::shared_ptr<CLI::App> app) {
+void StudioContext::addToCommandLine (std::shared_ptr<CLI::App> app) {
   volumeParams = std::make_shared<sg::VolumeParams>();
   app->add_option(
     "files",
@@ -245,7 +245,7 @@ box3f StudioContext::getSceneBounds()
 //}}}
 
 //{{{
-int main(int argc, const char *argv[])
+int main (int argc, const char *argv[])
 {
   std::cout << "OSPRay Studio" << std::endl;
 
